@@ -128,3 +128,24 @@ resource "aws_security_group" "web_sg" {
     Name = "web-server-sg"
   }
 }
+
+resource "aws_instance" "web_server" {
+  ami             = var.ami_id
+  instance_type   = var.instance_type
+  subnet_id       = aws_subnet.public[0].id 
+  key_name        = var.key_name
+  vpc_security_group_ids = [aws_security_group.web_sg.id] 
+
+  user_data = <<-EOF
+    #!/bin/bash
+    sudo yum update -y
+    sudo amazon-linux-extras enable nginx1
+    sudo yum install -y nginx
+    sudo systemctl start nginx
+    sudo systemctl enable nginx
+  EOF
+
+  tags = {
+    Name = "web-server"
+  }
+}
